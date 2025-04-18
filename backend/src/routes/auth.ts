@@ -2,8 +2,19 @@ import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const router = express.Router();
+
+// Email transporter setup
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  }
+});
 
 // Middleware to verify JWT token
 const auth = async (req: Request, res: Response, next: express.NextFunction) => {
@@ -63,7 +74,22 @@ router.post('/register', [
       { expiresIn: '24h' }
     );
 
+    // Send welcome email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Welcome to NIELIT Alumni Network',
+      html: `
+        <h1>Welcome to NIELIT Alumni Network!</h1>
+        <p>Dear ${username},</p>
+        <p>Thank you for registering with us. We're excited to have you join our alumni community.</p>
+        <p>If you ever need to reset your password, you can do so by visiting the login page and clicking on "Forgot Password".</p>
+        <p>Best regards,<br>NIELIT Alumni Network Team</p>
+      `
+    });
+
     res.status(201).json({
+      message: 'Registration successful! Please check your email for a welcome message.',
       token,
       user: {
         id: user._id,
@@ -73,6 +99,76 @@ router.post('/register', [
         avatarUrl: user.avatarUrl
       }
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Request password reset
+router.post('/forgot-password', [
+  body('email').isEmail().normalizeEmail()
+], async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with this email' });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour
+    await user.save();
+
+    // Send reset email
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h1>Password Reset Request</h1>
+        <p>You requested a password reset for your NIELIT Alumni Network account.</p>
+        <p>Click the link below to reset your password:</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `
+    });
+
+    res.json({ message: 'Password reset email sent' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Reset password
+router.post('/reset-password/:token', [
+  body('password').isLength({ min: 6 })
+], async (req: Request, res: Response) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: 'Password has been reset successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

@@ -1,48 +1,54 @@
-# NIELIT Alumni Network
+# NIELIT Alumni Portal
 
-A comprehensive web platform designed to connect NIELIT graduates, facilitate networking, and provide resources for professional growth.
+A modern alumni portal for NIELIT Calicut, built with React, TypeScript, and Node.js.
 
-## Project Overview
+## Project Structure
 
-The NIELIT Alumni Network is a full-stack web application developed as part of my college project. It serves as a digital platform for NIELIT alumni to connect, share experiences, and access valuable resources.
-
-### Key Features
-
-- **User Authentication**: Secure login and registration system
-- **Profile Management**: Customizable user profiles with professional information
-- **Networking**: Connect with fellow alumni and industry professionals
-- **Resource Sharing**: Share and access educational and professional resources
-- **Event Management**: Create and manage alumni events
-- **Discussion Forums**: Engage in meaningful discussions and knowledge sharing
-- **Job Opportunities**: Access and share job postings within the alumni network
+```
+alumni/
+├── backend/               # Backend server (Node.js + Express)
+│   ├── src/
+│   │   ├── models/       # MongoDB models
+│   │   ├── routes/       # API routes
+│   │   ├── middleware/   # Express middleware
+│   │   └── index.ts      # Server entry point
+│   ├── package.json
+│   └── tsconfig.json
+├── src/                  # Frontend (React + TypeScript)
+│   ├── components/       # Reusable components
+│   ├── pages/           # Page components
+│   ├── services/        # API services
+│   ├── contexts/        # React contexts
+│   ├── hooks/           # Custom hooks
+│   └── lib/            # Utility functions
+├── public/              # Static assets
+├── package.json
+└── vite.config.ts
+```
 
 ## Tech Stack
 
-### Frontend
-- React.js with TypeScript
-- Tailwind CSS for styling
-- Shadcn UI components
-- Vite for build tooling
+- Frontend:
+  - React 18
+  - TypeScript
+  - Vite
+  - Tailwind CSS
+  - Radix UI
+  - React Router
 
-### Backend
-- Node.js with Express
-- TypeScript
-- MongoDB for database
-- JWT for authentication
+- Backend:
+  - Node.js
+  - Express
+  - TypeScript
+  - MongoDB
+  - JWT Authentication
 
-## Getting Started
-
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
-- MongoDB
-
-### Installation
+## Development
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/anushkaEsdev/nielitalumni.git
-cd nielitalumni
+git clone https://github.com/yourusername/alumni-portal.git
+cd alumni-portal
 ```
 
 2. Install dependencies:
@@ -53,57 +59,72 @@ npm install
 # Install backend dependencies
 cd backend
 npm install
+cd ..
 ```
 
-3. Set up environment variables:
+3. Start development servers:
 ```bash
-# Frontend
-cp .env.example .env
-
-# Backend
+# Start backend server
 cd backend
-cp .env.example .env
-```
-
-4. Start the development servers:
-```bash
-# Start frontend
 npm run dev
 
-# Start backend (in a separate terminal)
-cd backend
+# Start frontend server (in a new terminal)
 npm run dev
 ```
 
-## Project Structure
+## Deployment
 
+### Backend (Render)
+
+1. Push your code to GitHub
+2. Connect your repository to Render
+3. Configure environment variables in Render:
+   - MONGODB_URI
+   - JWT_SECRET
+   - NODE_ENV=production
+   - PORT=5000
+   - CORS_ORIGIN=https://alumni-portal.netlify.app
+
+### Frontend (Netlify)
+
+1. Push your code to GitHub
+2. Connect your repository to Netlify
+3. Configure environment variables:
+   - VITE_API_URL=https://alumni-backend.onrender.com
+   - NODE_ENV=production
+
+4. Set build settings:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+
+## Environment Variables
+
+### Backend (.env)
 ```
-nielitalumni/
-├── src/                    # Frontend source code
-│   ├── components/         # React components
-│   ├── pages/             # Page components
-│   ├── services/          # API services
-│   └── contexts/          # React contexts
-├── backend/               # Backend source code
-│   ├── src/              # Backend source
-│   ├── models/           # Database models
-│   └── routes/           # API routes
-└── public/               # Static assets
+PORT=5000
+MONGODB_URI=mongodb+srv://your-mongodb-uri
+JWT_SECRET=your-secret-key
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:3000
 ```
 
-## Development
+### Frontend (.env)
+```
+VITE_API_URL=http://localhost:5000
+```
 
-This project was developed by Anushka Choudhary as part of my college curriculum at NIELIT. The goal was to create a platform that would help maintain connections between NIELIT graduates and provide them with valuable resources for their professional growth.
+## API Documentation
+
+The API documentation is available at `/api/docs` when running the backend server.
 
 ## Contributing
 
-While this is primarily a college project, contributions and suggestions are welcome. Please feel free to open issues or submit pull requests.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-Anushka Choudhary
-- GitHub: [@anushkaEsdev](https://github.com/anushkaEsdev)
+This project is licensed under the MIT License.

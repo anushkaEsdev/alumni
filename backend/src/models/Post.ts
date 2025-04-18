@@ -17,6 +17,7 @@ export interface IPost extends Document {
   comments: IComment[];
   imageUrl?: string;
   linkUrl?: string;
+  likes: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +68,10 @@ const postSchema = new Schema<IPost>({
   },
   linkUrl: {
     type: String
+  },
+  likes: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true

@@ -33,7 +33,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -103,39 +103,39 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   };
 
   const updatePassword = async (currentPassword: string, newPassword: string) => {
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-
     try {
       await api.put('/users/password', { currentPassword, newPassword });
-      return Promise.resolve();
+      toast.success("Password updated successfully");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to update password");
       throw error;
     }
   };
 
+  const value = {
+    user,
+    loading,
+    login,
+    register,
+    logout,
+    isAuthenticated: !!user,
+    updateProfile,
+    updatePassword
+  };
+
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      register, 
-      logout, 
-      isAuthenticated: !!user,
-      updateProfile,
-      updatePassword
-    }}>
-      {!loading && children}
+    <AuthContext.Provider value={value}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
+
+export { AuthProvider, useAuth };

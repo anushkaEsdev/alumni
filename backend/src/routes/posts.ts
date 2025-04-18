@@ -146,6 +146,7 @@ router.post('/:id/comments', authMiddleware, [
     post.comments.push(comment);
     await post.save();
     await post.populate('author', 'username name avatarUrl');
+    await post.populate('comments.author.id', 'username name avatarUrl');
     res.json(post);
   } catch (error) {
     console.error(error);
@@ -153,4 +154,4 @@ router.post('/:id/comments', authMiddleware, [
   }
 });
 
-export const postRoutes = router; 
+export default router; 

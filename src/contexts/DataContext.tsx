@@ -41,73 +41,75 @@ interface Comment {
 
 interface DataContextType {
   posts: Post[];
-  events: any[];
-  questions: any[];
+  events: Post[];
+  questions: Post[];
   loading: boolean;
   error: string | null;
-  addPost: (post: CreatePostData) => Promise<void>;
+  addPost: (post: Omit<Post, 'id'>) => Promise<void>;
+  updatePost: (id: string, post: Partial<Post>) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
-  editPost: (id: string, updatedPost: Partial<Post>) => Promise<void>;
   addComment: (postId: string, content: string) => Promise<void>;
   getPostsByType: (type: Post['type']) => Post[];
   getUpcomingMeetings: () => Post[];
-  refreshData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-export const DataProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+const DataProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [events, setEvents] = useState<Post[]>([]);
+  const [questions, setQuestions] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [postsRes, eventsRes, questionsRes] = await Promise.all([
-        postsAPI.getAll(),
-        eventsAPI.getAll(),
-        questionsAPI.getAll()
-      ]);
-
-      setPosts(postsRes.data);
-      setEvents(eventsRes.data);
-      setQuestions(questionsRes.data);
-    } catch (err: any) {
-      console.error('Error fetching data:', err);
-      setError(err.message || 'Failed to fetch data');
-      toast.error('Failed to load data. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const refreshData = async () => {
-    await fetchData();
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [postsResponse, eventsResponse, questionsResponse] = await Promise.all([
+        postsAPI.getAll(),
+        eventsAPI.getAll(),
+        questionsAPI.getAll()
+      ]);
+
+      setPosts(postsResponse.data);
+      setEvents(eventsResponse.data);
+      setQuestions(questionsResponse.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError('Failed to load data');
+      toast.error('Failed to load data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addPost = async (postData: CreatePostData) => {
-    if (!user) {
-      toast.error("You must be logged in to create a post");
-      return;
-    }
-
+  const addPost = async (post: Omit<Post, 'id'>) => {
     try {
-      const response = await postsAPI.create(postData);
-      setPosts(prev => [response.data, ...prev]);
+      const response = await postsAPI.create(post);
+      setPosts(prev => [...prev, response.data]);
       toast.success("Post created successfully!");
     } catch (error) {
       console.error('Failed to create post:', error);
       toast.error('Failed to create post');
+      throw error;
+    }
+  };
+
+  const updatePost = async (id: string, updatedPost: Partial<Post>) => {
+    try {
+      const response = await postsAPI.update(id, updatedPost);
+      setPosts(prev => prev.map(post => 
+        post.id === id ? response.data : post
+      ));
+      toast.success("Post updated successfully!");
+    } catch (error) {
+      console.error('Failed to update post:', error);
+      toast.error('Failed to update post');
       throw error;
     }
   };
@@ -120,20 +122,6 @@ export const DataProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     } catch (error) {
       console.error('Failed to delete post:', error);
       toast.error('Failed to delete post');
-      throw error;
-    }
-  };
-
-  const editPost = async (id: string, updatedPost: Partial<Post>) => {
-    try {
-      const response = await postsAPI.update(id, updatedPost);
-      setPosts(prev => prev.map(post => 
-        post.id === id ? response.data : post
-      ));
-      toast.success("Post updated successfully!");
-    } catch (error) {
-      console.error('Failed to update post:', error);
-      toast.error('Failed to update post');
       throw error;
     }
   };
@@ -174,30 +162,33 @@ export const DataProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       );
   };
 
+  const value = {
+    posts,
+    events,
+    questions,
+    loading,
+    error,
+    addPost,
+    updatePost,
+    deletePost,
+    addComment,
+    getPostsByType,
+    getUpcomingMeetings
+  };
+
   return (
-    <DataContext.Provider value={{ 
-      posts, 
-      events,
-      questions,
-      loading,
-      error,
-      addPost, 
-      deletePost, 
-      editPost, 
-      addComment,
-      getPostsByType,
-      getUpcomingMeetings,
-      refreshData
-    }}>
+    <DataContext.Provider value={value}>
       {children}
     </DataContext.Provider>
   );
 };
 
-export const useData = () => {
+const useData = () => {
   const context = useContext(DataContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useData must be used within a DataProvider');
   }
   return context;
 };
+
+export { DataProvider, useData };

@@ -1,15 +1,14 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
+// Create API instance
 export const api = axios.create({
-  baseURL: API_URL,
+  baseURL: process.env.VITE_API_URL || 'https://alumni-7bn6.onrender.com/api',
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
-// Add token to requests if it exists
+// Add token to requests if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,33 +17,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth API
-export const authAPI = {
-  login: (email: string, password: string) =>
-    api.post('/auth/login', { email, password }),
-  register: (username: string, email: string, password: string) =>
-    api.post('/auth/register', { username, email, password }),
-};
+// Handle response errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Posts API
 export const postsAPI = {
   getAll: () => api.get('/posts'),
-  getByType: (type: string) => api.get(`/posts/type/${type}`),
+  getById: (id: string) => api.get(`/posts/${id}`),
   create: (data: any) => api.post('/posts', data),
   update: (id: string, data: any) => api.put(`/posts/${id}`, data),
   delete: (id: string) => api.delete(`/posts/${id}`),
   addComment: (id: string, content: string) =>
-    api.post(`/posts/${id}/comments`, { content }),
-};
-
-// Events API
-export const eventsAPI = {
-  getAll: () => api.get('/events'),
-  getUpcoming: () => api.get('/events/upcoming'),
-  getPast: () => api.get('/events/past'),
-  create: (data: any) => api.post('/events', data),
-  update: (id: string, data: any) => api.put(`/events/${id}`, data),
-  delete: (id: string) => api.delete(`/events/${id}`),
+    api.post(`/posts/${id}/comments`, { content })
 };
 
 // Questions API
@@ -54,6 +47,33 @@ export const questionsAPI = {
   create: (data: any) => api.post('/questions', data),
   update: (id: string, data: any) => api.put(`/questions/${id}`, data),
   delete: (id: string) => api.delete(`/questions/${id}`),
-  addAnswer: (id: string, content: string) =>
-    api.post(`/questions/${id}/answers`, { content }),
+  addComment: (id: string, content: string) =>
+    api.post(`/questions/${id}/comments`, { content })
+};
+
+// Events API
+export const eventsAPI = {
+  getAll: () => api.get('/events'),
+  getById: (id: string) => api.get(`/events/${id}`),
+  create: (data: any) => api.post('/events', data),
+  update: (id: string, data: any) => api.put(`/events/${id}`, data),
+  delete: (id: string) => api.delete(`/events/${id}`),
+  addComment: (id: string, content: string) =>
+    api.post(`/events/${id}/comments`, { content })
+};
+
+// Auth API
+export const authAPI = {
+  register: (username: string, email: string, password: string) => 
+    api.post('/auth/register', { username, email, password }),
+  login: (email: string, password: string) => 
+    api.post('/auth/login', { email, password }),
+  forgotPassword: (email: string) => 
+    api.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    api.post(`/auth/reset-password/${token}`, { password }),
+  updateProfile: (data: any) => 
+    api.put('/auth/profile', data),
+  updatePassword: (currentPassword: string, newPassword: string) => 
+    api.put('/auth/password', { currentPassword, newPassword })
 }; 

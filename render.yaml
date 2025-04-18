@@ -8,13 +8,13 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGODB_URI
-        value: mongodb+srv://anushka:anushka11@alumni.w9d64fs.mongodb.net/
+        value: mongodb+srv://anushka:anushka11@alumni.w9d64fs.mongodb.net/alumni?retryWrites=true&w=majority&appName=alumni
       - key: JWT_SECRET
-        value: your_jwt_secret_here
-      - key: PORT
-        value: 5000
+        value: alumni_portal_secret_key
       - key: CORS_ORIGIN
-        value: https://alumni-portal.netlify.app
+        value: https://alumni-7bn6.onrender.com
+    healthCheckPath: /api/health
+    autoDeploy: true
   - type: web
     name: alumni-frontend
     env: node

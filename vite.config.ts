@@ -9,6 +9,22 @@ export default defineConfig({
     port: 3000,
     host: true,
     strictPort: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    },
+    watch: {
+      usePolling: true
+    }
+  },
+  preview: {
+    port: 3000,
+    host: true,
+    strictPort: true
   },
   resolve: {
     alias: {
@@ -29,7 +45,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
+    include: ['react', 'react-dom', 'react-router-dom', 'react-hot-toast'],
   },
 });
 

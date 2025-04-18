@@ -95,10 +95,13 @@ For local development:
    ```
 3. Start the backend:
    ```
-   cd backend && npm run dev
+   cd backend
+   npm install
+   npm run dev
    ```
 4. In a new terminal, start the frontend:
    ```
+   npm install
    npm run dev
    ```
 5. The application will be available at `http://localhost:3000` 

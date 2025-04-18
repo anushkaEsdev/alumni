@@ -1,12 +1,13 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import { Post } from '../models/Post';
+import jwt from 'jsonwebtoken';
+import { Post, IPost, IComment } from '../models/Post';
 import { User } from '../models/User';
 
 const router = express.Router();
 
 // Middleware to verify JWT token
-const auth = async (req: any, res: any, next: any) => {
+const auth = async (req: Request, res: Response, next: express.NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
@@ -20,7 +21,7 @@ const auth = async (req: any, res: any, next: any) => {
       return res.status(401).json({ message: 'Token is not valid' });
     }
 
-    req.user = user;
+    (req as any).user = user;
     next();
   } catch (error) {
     res.status(401).json({ message: 'Token is not valid' });
@@ -28,11 +29,12 @@ const auth = async (req: any, res: any, next: any) => {
 };
 
 // Get all posts
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const posts = await Post.find()
-      .sort({ createdAt: -1 })
-      .populate('author.id', 'username avatarUrl');
+      .populate('author', 'username avatarUrl')
+      .populate('comments.author', 'username avatarUrl')
+      .sort({ createdAt: -1 });
     res.json(posts);
   } catch (error) {
     console.error(error);
@@ -54,33 +56,28 @@ router.get('/type/:type', async (req, res) => {
   }
 });
 
-// Create post
+// Create a post
 router.post('/', auth, [
-  body('title').trim().notEmpty(),
   body('content').trim().notEmpty(),
-  body('type').isIn(['blog', 'interview', 'meeting'])
-], async (req: any, res) => {
+  body('type').isIn(['text', 'image', 'link'])
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { title, content, type, meetingDate, meetingTime } = req.body;
-
+    const { content, type, imageUrl, linkUrl } = req.body;
     const post = new Post({
-      title,
       content,
       type,
-      author: {
-        id: req.user._id,
-        name: req.user.username
-      },
-      meetingDate,
-      meetingTime
+      imageUrl,
+      linkUrl,
+      author: (req as any).user._id
     });
 
     await post.save();
+    await post.populate('author', 'username avatarUrl');
     res.status(201).json(post);
   } catch (error) {
     console.error(error);
@@ -88,26 +85,34 @@ router.post('/', auth, [
   }
 });
 
-// Update post
-router.put('/:id', auth, async (req: any, res) => {
+// Update a post
+router.put('/:id', auth, [
+  body('content').optional().trim().notEmpty(),
+  body('type').optional().isIn(['text', 'image', 'link'])
+], async (req: Request, res: Response) => {
   try {
-    const { title, content, meetingDate, meetingTime } = req.body;
-    const post = await Post.findById(req.params.id);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
+    const post = await Post.findById(req.params.id);
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    if (post.author.id.toString() !== req.user._id.toString()) {
+    if (post.author.toString() !== (req as any).user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    post.title = title || post.title;
-    post.content = content || post.content;
-    post.meetingDate = meetingDate || post.meetingDate;
-    post.meetingTime = meetingTime || post.meetingTime;
+    const { content, type, imageUrl, linkUrl } = req.body;
+    if (content) post.content = content;
+    if (type) post.type = type;
+    if (imageUrl) post.imageUrl = imageUrl;
+    if (linkUrl) post.linkUrl = linkUrl;
 
     await post.save();
+    await post.populate('author', 'username avatarUrl');
     res.json(post);
   } catch (error) {
     console.error(error);
@@ -115,31 +120,30 @@ router.put('/:id', auth, async (req: any, res) => {
   }
 });
 
-// Delete post
-router.delete('/:id', auth, async (req: any, res) => {
+// Delete a post
+router.delete('/:id', auth, async (req: Request, res: Response) => {
   try {
     const post = await Post.findById(req.params.id);
-
     if (!post) {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    if (post.author.id.toString() !== req.user._id.toString()) {
+    if (post.author.toString() !== (req as any).user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    await post.remove();
-    res.json({ message: 'Post removed' });
+    await Post.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Post deleted' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Add comment
+// Add a comment
 router.post('/:id/comments', auth, [
   body('content').trim().notEmpty()
-], async (req: any, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -151,18 +155,20 @@ router.post('/:id/comments', auth, [
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    const comment = {
+    const comment: IComment = {
       content: req.body.content,
       author: {
-        id: req.user._id,
-        name: req.user.username
-      }
+        id: (req as any).user._id,
+        username: (req as any).user.username,
+        avatarUrl: (req as any).user.avatarUrl
+      },
+      createdAt: new Date()
     };
 
     post.comments.push(comment);
     await post.save();
-
-    res.status(201).json(post);
+    await post.populate('author', 'username avatarUrl');
+    res.json(post);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

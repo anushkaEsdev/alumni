@@ -159,13 +159,6 @@ const LoginPage = () => {
                     ) : 'Sign In'}
                   </Button>
                 )}
-                
-                {/* Demo account info */}
-                <div className="p-3 bg-gray-50 rounded-md text-sm">
-                  <p className="font-medium mb-1">Demo Accounts:</p>
-                  <p>Email: john@example.com | Password: password123</p>
-                  <p>Email: jane@example.com | Password: password123</p>
-                </div>
               </CardContent>
               <CardFooter className="flex flex-col">
                 <p className="mt-4 text-center text-sm">

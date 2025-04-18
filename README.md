@@ -1,73 +1,109 @@
-# Welcome to your Lovable project
+# NIELIT Alumni Network
 
-## Project info
+A comprehensive web platform designed to connect NIELIT graduates, facilitate networking, and provide resources for professional growth.
 
-**URL**: https://lovable.dev/projects/588ce6a0-2ffa-47a1-b918-f9aad5527fae
+## Project Overview
 
-## How can I edit this code?
+The NIELIT Alumni Network is a full-stack web application developed as part of my college project. It serves as a digital platform for NIELIT alumni to connect, share experiences, and access valuable resources.
 
-There are several ways of editing your application.
+### Key Features
 
-**Use Lovable**
+- **User Authentication**: Secure login and registration system
+- **Profile Management**: Customizable user profiles with professional information
+- **Networking**: Connect with fellow alumni and industry professionals
+- **Resource Sharing**: Share and access educational and professional resources
+- **Event Management**: Create and manage alumni events
+- **Discussion Forums**: Engage in meaningful discussions and knowledge sharing
+- **Job Opportunities**: Access and share job postings within the alumni network
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/588ce6a0-2ffa-47a1-b918-f9aad5527fae) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend
+- React.js with TypeScript
+- Tailwind CSS for styling
+- Shadcn UI components
+- Vite for build tooling
 
-**Use your preferred IDE**
+### Backend
+- Node.js with Express
+- TypeScript
+- MongoDB for database
+- JWT for authentication
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- MongoDB
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. Clone the repository:
+```bash
+git clone https://github.com/anushkaEsdev/nielitalumni.git
+cd nielitalumni
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. Install dependencies:
+```bash
+# Install frontend dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install backend dependencies
+cd backend
+npm install
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Set up environment variables:
+```bash
+# Frontend
+cp .env.example .env
+
+# Backend
+cd backend
+cp .env.example .env
+```
+
+4. Start the development servers:
+```bash
+# Start frontend
+npm run dev
+
+# Start backend (in a separate terminal)
+cd backend
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Project Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+nielitalumni/
+├── src/                    # Frontend source code
+│   ├── components/         # React components
+│   ├── pages/             # Page components
+│   ├── services/          # API services
+│   └── contexts/          # React contexts
+├── backend/               # Backend source code
+│   ├── src/              # Backend source
+│   ├── models/           # Database models
+│   └── routes/           # API routes
+└── public/               # Static assets
+```
 
-**Use GitHub Codespaces**
+## Development
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+This project was developed by Anushka Choudhary as part of my college curriculum at NIELIT. The goal was to create a platform that would help maintain connections between NIELIT graduates and provide them with valuable resources for their professional growth.
 
-## What technologies are used for this project?
+## Contributing
 
-This project is built with:
+While this is primarily a college project, contributions and suggestions are welcome. Please feel free to open issues or submit pull requests.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## License
 
-## How can I deploy this project?
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Simply open [Lovable](https://lovable.dev/projects/588ce6a0-2ffa-47a1-b918-f9aad5527fae) and click on Share -> Publish.
+## Contact
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Anushka Choudhary
+- GitHub: [@anushkaEsdev](https://github.com/anushkaEsdev)

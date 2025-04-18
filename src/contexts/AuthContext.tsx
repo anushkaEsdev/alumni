@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { authAPI } from '@/services/api';
+import { api } from '@/services/api';
 
 // Mock user data for our frontend implementation
 interface User {
@@ -31,26 +32,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Mock user database
-const MOCK_USERS = [
-  {
-    id: "1",
-    username: "John Doe",
-    email: "john@example.com",
-    password: "password123",
-    bio: "Software Engineer with 5 years of experience",
-    avatarUrl: "/default-avatar.png"
-  },
-  {
-    id: "2",
-    username: "Jane Smith",
-    email: "jane@example.com",
-    password: "password123",
-    bio: "UX Designer passionate about creating beautiful interfaces",
-    avatarUrl: "/default-avatar.png"
-  }
-];
 
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -110,8 +91,8 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
 
     try {
-      // In a real app, you would call the backend API here
-      const updatedUser = { ...user, ...data };
+      const response = await api.put('/users/profile', data);
+      const updatedUser = response.data;
       localStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
       toast.success("Profile updated successfully");
@@ -126,24 +107,13 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       throw new Error("User not authenticated");
     }
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Find user in mock database
-    const userIndex = MOCK_USERS.findIndex(u => u.id === user.id);
-    if (userIndex === -1) {
-      throw new Error("User not found");
+    try {
+      await api.put('/users/password', { currentPassword, newPassword });
+      return Promise.resolve();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update password");
+      throw error;
     }
-
-    // Check if current password is correct
-    if (MOCK_USERS[userIndex].password !== currentPassword) {
-      throw new Error("Current password is incorrect");
-    }
-
-    // Update password
-    MOCK_USERS[userIndex].password = newPassword;
-
-    return Promise.resolve();
   };
 
   return (

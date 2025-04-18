@@ -1,28 +1,23 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IPost extends Document {
-  title: string;
   content: string;
-  type: 'blog' | 'interview' | 'meeting';
-  author: {
-    id: Schema.Types.ObjectId;
-    name: string;
-  };
-  date: Date;
+  type: 'text' | 'image' | 'link';
+  author: Schema.Types.ObjectId;
+  imageUrl?: string;
+  linkUrl?: string;
   comments: IComment[];
-  meetingDate?: Date;
-  meetingTime?: string;
   likes: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface IComment {
-  id: Schema.Types.ObjectId;
   content: string;
   author: {
     id: Schema.Types.ObjectId;
-    name: string;
+    username: string;
+    avatarUrl?: string;
   };
   createdAt: Date;
 }
@@ -38,9 +33,12 @@ const commentSchema = new Schema<IComment>({
       ref: 'User',
       required: true
     },
-    name: {
+    username: {
       type: String,
       required: true
+    },
+    avatarUrl: {
+      type: String
     }
   }
 }, {
@@ -48,42 +46,27 @@ const commentSchema = new Schema<IComment>({
 });
 
 const postSchema = new Schema<IPost>({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
   content: {
     type: String,
     required: true
   },
   type: {
     type: String,
-    enum: ['blog', 'interview', 'meeting'],
+    enum: ['text', 'image', 'link'],
     required: true
   },
   author: {
-    id: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    }
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
-  date: {
-    type: Date,
-    default: Date.now
-  },
-  comments: [commentSchema],
-  meetingDate: {
-    type: Date
-  },
-  meetingTime: {
+  imageUrl: {
     type: String
   },
+  linkUrl: {
+    type: String
+  },
+  comments: [commentSchema],
   likes: {
     type: Number,
     default: 0

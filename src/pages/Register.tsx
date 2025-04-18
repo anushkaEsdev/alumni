@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
 const RegisterPage = () => {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -22,7 +22,7 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !password || !confirmPassword) {
+    if (!username || !email || !password || !confirmPassword) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -35,7 +35,7 @@ const RegisterPage = () => {
     setLoading(true);
     
     try {
-      await register(name, email, password);
+      await register(username, email, password);
       navigate('/');
     } catch (error) {
       console.error('Registration error:', error);
@@ -63,14 +63,14 @@ const RegisterPage = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="name"
-                  name="name"
+                  id="username"
+                  name="username"
                   type="text"
                   required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -106,8 +106,8 @@ const RegisterPage = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Register
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Creating Account...' : 'Register'}
               </Button>
             </form>
           </CardContent>

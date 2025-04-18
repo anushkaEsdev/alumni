@@ -41,40 +41,59 @@ interface Comment {
 
 interface DataContextType {
   posts: Post[];
+  events: any[];
+  questions: any[];
   loading: boolean;
+  error: string | null;
   addPost: (post: CreatePostData) => Promise<void>;
   deletePost: (id: string) => Promise<void>;
   editPost: (id: string, updatedPost: Partial<Post>) => Promise<void>;
   addComment: (postId: string, content: string) => Promise<void>;
   getPostsByType: (type: Post['type']) => Post[];
   getUpcomingMeetings: () => Post[];
-  refreshPosts: () => Promise<void>;
+  refreshData: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Load posts from API
-  const loadPosts = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await postsAPI.getAll();
-      setPosts(response.data);
-    } catch (error) {
-      console.error('Failed to load posts:', error);
-      toast.error('Failed to load posts');
+      setError(null);
+      
+      const [postsRes, eventsRes, questionsRes] = await Promise.all([
+        postsAPI.getAll(),
+        eventsAPI.getAll(),
+        questionsAPI.getAll()
+      ]);
+
+      setPosts(postsRes.data);
+      setEvents(eventsRes.data);
+      setQuestions(questionsRes.data);
+    } catch (err: any) {
+      console.error('Error fetching data:', err);
+      setError(err.message || 'Failed to fetch data');
+      toast.error('Failed to load data. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPosts();
+    fetchData();
   }, []);
+
+  const refreshData = async () => {
+    await fetchData();
+  };
 
   const addPost = async (postData: CreatePostData) => {
     if (!user) {
@@ -158,14 +177,17 @@ export const DataProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   return (
     <DataContext.Provider value={{ 
       posts, 
+      events,
+      questions,
       loading,
+      error,
       addPost, 
       deletePost, 
       editPost, 
       addComment,
       getPostsByType,
       getUpcomingMeetings,
-      refreshPosts: loadPosts
+      refreshData
     }}>
       {children}
     </DataContext.Provider>

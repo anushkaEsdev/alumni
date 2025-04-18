@@ -1,7 +1,6 @@
-
 import type { Config } from "tailwindcss";
 
-export default {
+const config = {
 	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
@@ -53,23 +52,11 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				"alumni-blue": {
+					DEFAULT: '#1e40af',
+					light: '#3b82f6',
+					dark: '#1e3a8a',
 				},
-				alumni: {
-					blue: '#2563eb',
-					lightBlue: '#3b82f6',
-					darkBlue: '#1d4ed8',
-					red: '#ef4444',
-					gray: '#f3f4f6'
-				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -102,3 +89,5 @@ export default {
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
+export default config;

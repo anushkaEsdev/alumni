@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from '@/contexts/AuthContext.tsx';
-import { DataProvider } from '@/contexts/DataContext.tsx';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { DataProvider } from '@/contexts/DataContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Home from '@/pages/Home';

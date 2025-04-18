@@ -19,6 +19,7 @@ const corsOptions = {
     'http://localhost:3002',
     'http://localhost:3003',
     'http://localhost:3004',
+    'http://localhost:3005',
     'https://alumni-7bn6.onrender.com'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -31,7 +32,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // MongoDB Connection
-const MONGODB_URI = 'mongodb+srv://anushka:anushka11@alumni.w9d64fs.mongodb.net/';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://anushka:anushka11@alumni.w9d64fs.mongodb.net/';
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch((error) => console.error('MongoDB connection error:', error));

@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { Post, IPost, IComment } from '../models/Post';
 import { User } from '../models/User';
-import { auth } from '../middleware/auth';
+import { auth as authMiddleware } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create post
-router.post('/', auth, [
+router.post('/', authMiddleware, [
   body('title').trim().notEmpty(),
   body('content').trim().notEmpty()
 ], async (req: Request, res: Response) => {
@@ -66,7 +66,7 @@ router.post('/', auth, [
 });
 
 // Update post
-router.put('/:id', auth, [
+router.put('/:id', authMiddleware, [
   body('title').optional().trim().notEmpty(),
   body('content').optional().trim().notEmpty()
 ], async (req: Request, res: Response) => {
@@ -99,7 +99,7 @@ router.put('/:id', auth, [
 });
 
 // Delete post
-router.delete('/:id', auth, async (req: Request, res: Response) => {
+router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) {
@@ -119,7 +119,7 @@ router.delete('/:id', auth, async (req: Request, res: Response) => {
 });
 
 // Add comment
-router.post('/:id/comments', auth, [
+router.post('/:id/comments', authMiddleware, [
   body('content').trim().notEmpty()
 ], async (req: Request, res: Response) => {
   try {

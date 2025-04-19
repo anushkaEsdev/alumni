@@ -5,10 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:all": "concurrently \"npm run dev\" \"cd backend && npm run dev\"",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:backend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "install:all": "npm install && cd backend && npm install",
+    "test:db": "cd backend && npx ts-node src/scripts/testDbConnection.ts",
     "build": "tsc && vite build",
+    "build:all": "npm run build && cd backend && npm run build",
     "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "clean": "rimraf node_modules dist && cd backend && rimraf node_modules dist"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",
@@ -52,6 +57,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.35",
+    "rimraf": "^6.0.1",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "vite": "^5.4.18"

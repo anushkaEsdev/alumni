@@ -12,10 +12,21 @@ dotenv.config();
 const app = express();
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://alumni-7bn6.onrender.com',
+  'https://alumni-portal.onrender.com'
+];
+
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://alumni-7bn6.onrender.com']
-    : ['http://localhost:3000'],
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -28,6 +39,20 @@ app.use(express.json());
 // Add a health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
+});
+
+// Add a root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Welcome to NIELIT Alumni API',
+    version: '1.0.0',
+    endpoints: [
+      '/api/auth',
+      '/api/posts',
+      '/api/events',
+      '/api/questions'
+    ]
+  });
 });
 
 // MongoDB Connection
@@ -62,10 +87,6 @@ mongoose.connect(MONGODB_URI, {
 });
 
 // Routes
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to NIELIT Alumni API' });
-});
-
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/events', eventRoutes);
